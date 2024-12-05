@@ -19,11 +19,11 @@ import socket
 import os, time
 import json
 
-s = socket.socket()
-host = ''  # Localhost
+
+host = '127.0.0.1'  # Localhost
 port = 5000
-s.bind((host, port))
-s.listen(5)
+
+
 
 
 def get_temp():
@@ -82,6 +82,7 @@ except:
 
 try:
     while True:
+
         # Retrieve sensor values
         temp = get_temp()
         arm_clock_speed = get_clock('arm')
@@ -93,17 +94,16 @@ try:
         ini_dict = {"temperature": temp, "arm_clock_speed": arm_clock_speed, "core_clock_speed": core_clock_speed,
                       "cpu_voltage": voltage, "total_memory" : total_mem}
 
-
-
         # converting dict to json
         f_dict = json.dumps(ini_dict)
 
-        c, addr = s.accept()
-        print('Got connection from', addr)
-        res = bytes(str(f_dict), 'utf-8')  # needs to be a byte
-        c.send(res)  # sends data as a byte type
+        c = socket.socket()
+        c.connect((host, port))
+        c.send(str(f_dict).encode())  # sends data as a byte type
         print(ini_dict)
+
         c.close()
+        time.sleep(5)
 
 except KeyboardInterrupt:
     c.close()
