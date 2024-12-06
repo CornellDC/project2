@@ -17,6 +17,7 @@ import time
 from asyncio import Event
 
 import PySimpleGUI as sg
+from pyexpat.errors import messages
 
 s = socket.socket()
 host = '0.0.0.0' # ip of raspberry pi, running the server
@@ -41,14 +42,18 @@ def main():
     # All the stuff inside your window.
     layout = [[sg.Text('TPRG Project 2 - Cornell Falconer - Lawson')],
               [sg.Multiline(default_text = "Type anything to start", size=(30, 10), key='-DATA-',enable_events=True, enter_submits=True)],
-              [sg.Button('Exit',key='-EXIT-')]]
+              [sg.Button('Exit',key='-EXIT-'), sg.Text("\u25EF", key='-LED-')]]
+
 
     # Create the Window
     window = sg.Window('TPRG Project 2 Server', layout)
 
+    # Initiate variable for calculating when the last message was received.
+    message_time = 0
+
     while True:
         # Reads from GUI window and stores its values.
-        event, values = window.read()  # timeout prevents gui from blocking the rest of the program.
+        event, values = window.read(timeout=300)  # timeout prevents gui from blocking the rest of the program.
 
         # Starts server thread.
         window.start_thread(lambda: sockets_server(window), ('-THREAD-', '-THEAD ENDED-'))
@@ -67,6 +72,20 @@ def main():
                 data = data +  f'{key} = {value}\n'
                 print(data)
                 window['-DATA-'].update(data)  # Clear the textbox
+
+                # Keep track of when the message was recieved.
+                message_time = time.time()
+
+                # Turn on LED
+                window['-LED-'].update('\u2B24')
+                window.Refresh()
+
+        # Turn off led if it;s been 2 seconds since a message.
+        if time.time() - message_time > 2:
+            window['-LED-'].update('\u25EF')
+            window.Refresh()
+
+
 
 
 if __name__ == '__main__':
