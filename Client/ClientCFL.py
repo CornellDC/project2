@@ -83,7 +83,7 @@ except:
     exit()
 
 try:
-    while True:
+    for i in range(50): # Send 50 iterations.
 
         # Retrieve sensor values
         temp = get_temp()
@@ -105,7 +105,9 @@ try:
         #print(ini_dict)
         print(f"Data sent to: {host}:{port}")
         c.close()
-        time.sleep(5)
+        time.sleep(2)
+
+    print("Done!")
 
 except KeyboardInterrupt:
     c.close()

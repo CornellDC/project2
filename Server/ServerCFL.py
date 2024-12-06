@@ -49,7 +49,7 @@ def main():
     Main Program. This will run inside the main guard.
     """
     layout = [[sg.Text('TPRG Project 2 - Cornell Falconer - Lawson')],
-              [sg.Multiline(default_text = "Type anything to start", size=(30, 10), key='-DATA-',enable_events=True, enter_submits=True)],
+              [sg.Multiline(default_text = "", size=(30, 10), key='-DATA-',enable_events=True, enter_submits=True)],
               [sg.Button('Exit',key='-EXIT-'), sg.Text("\u25EF", key='-LED-'), sg.Text("Data Received.")]]
 
 
@@ -87,8 +87,8 @@ def main():
                 window['-LED-'].update('\u2B24')
                 window.Refresh()
 
-        # Turn off led if it;s been 2 seconds since a message.
-        if time.time() - message_time > 2:
+        # Turn off led if it's been 0.5 seconds since a message.
+        if time.time() - message_time > 0.5:
             window['-LED-'].update('\u25EF')
             window.Refresh()
 
