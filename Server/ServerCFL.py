@@ -92,6 +92,8 @@ def main():
             window['-LED-'].update('\u25EF')
             window.Refresh()
 
+    print("Thank you for using my program.")
+
 try:
     if __name__ == '__main__':
         main()
