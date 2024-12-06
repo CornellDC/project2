@@ -74,11 +74,13 @@ def get_voltage():
     formatted_voltage = str(formatted_voltage) + 'V' # Convert back to string and add the 'V'.
     return formatted_voltage
 
-# Attempt to use Vgcencmds to check if it is running on a PI.
+
+# check if running on pi
 try:
-    get_temp()
+    if not os.uname()[1] == "raspberrypi": # Confirm the machine is specifically the pi and not just linux.
+        exit()
 except:
-    exit("Not running on PI")
+    exit()
 
 try:
     while True:
@@ -100,8 +102,8 @@ try:
         c = socket.socket()
         c.connect((host, port))
         c.send(str(f_dict).encode())  # sends data as a byte type
-        print(ini_dict)
-
+        #print(ini_dict)
+        print(f"Data sent to: {host}:{port}")
         c.close()
         time.sleep(5)
 

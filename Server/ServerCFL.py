@@ -32,21 +32,21 @@ def sockets_server(window):
     Seperate thread that will run the server communications to avoid blocking the GUI.
 
     """
+
+    print(f"Server started!")
     while True:
         client, addr = s.accept()
         message = client.recv(1024).decode()
 
-        # Print each key and value pair to the shell.
-
+        print(f"Data received from: {addr[0]}:{addr[1]}")
         window.write_event_value(('-THREAD-', message), message)
 
         # Hopefully prevents the program from running out of threads.
         window.write_event_value('-THREAD-', '-THREAD ENDED-')
 
-
 def main():
     """
-    Main Program. This will run inside of the main guard.
+    Main Program. This will run inside the main guard.
     """
     layout = [[sg.Text('TPRG Project 2 - Cornell Falconer - Lawson')],
               [sg.Multiline(default_text = "Type anything to start", size=(30, 10), key='-DATA-',enable_events=True, enter_submits=True)],
@@ -70,7 +70,6 @@ def main():
             break
 
         if event[0] == '-THREAD-':
-            print(event[1])
             f_dict = json.loads(event[1])  # Converts the received Json into a python dict.
 
             data = ''
@@ -78,10 +77,10 @@ def main():
                 # print(message)
                 # print(f'{key} = {value}')
                 data = data +  f'{key} = {value}\n'
-                print(data)
+                # print(data)
                 window['-DATA-'].update(data)  # Clear the textbox
 
-                # Keep track of when the message was recieved.
+                # Keep track of when the message was received.
                 message_time = time.time()
 
                 # Turn on LED
@@ -93,5 +92,9 @@ def main():
             window['-LED-'].update('\u25EF')
             window.Refresh()
 
-if __name__ == '__main__':
-    main()
+try:
+    if __name__ == '__main__':
+        main()
+
+except KeyboardInterrupt:
+    print("Thank you for using my program.")
