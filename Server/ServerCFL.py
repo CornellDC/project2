@@ -40,7 +40,7 @@ def sockets_server(window):
 def main():
     # All the stuff inside your window.
     layout = [[sg.Text('TPRG Project 2 - Cornell Falconer - Lawson')],
-              [sg.Multiline(default_text = "Output", size=(30, 10), key='-DATA-',enable_events=True, enter_submits=True)],
+              [sg.Multiline(default_text = "Type anything to start", size=(30, 10), key='-DATA-',enable_events=True, enter_submits=True)],
               [sg.Button('Exit',key='-EXIT-')]]
 
     # Create the Window
