@@ -14,13 +14,11 @@ credit to the original author(s).
 import json
 import socket
 import time
-from asyncio import Event
-
 import PySimpleGUI as sg
-from pyexpat.errors import messages
+
 
 s = socket.socket()
-host = '0.0.0.0' # ip of raspberry pi, running the server
+host = '0.0.0.0' # IP to bind.
 port = 5000
 s.bind((host, port))
 
@@ -30,6 +28,10 @@ sg.theme('LightBlue') # Add a touch of color
 
 
 def sockets_server(window):
+    """
+    Seperate thread that will run the server communications to avoid blocking the GUI.
+
+    """
     while True:
         client, addr = s.accept()
         message = client.recv(1024).decode()
@@ -38,11 +40,17 @@ def sockets_server(window):
 
         window.write_event_value(('-THREAD-', message), message)
 
+        # Hopefully prevents the program from running out of threads.
+        window.write_event_value('-THREAD-', '-THREAD ENDED-')
+
+
 def main():
-    # All the stuff inside your window.
+    """
+    Main Program. This will run inside of the main guard.
+    """
     layout = [[sg.Text('TPRG Project 2 - Cornell Falconer - Lawson')],
               [sg.Multiline(default_text = "Type anything to start", size=(30, 10), key='-DATA-',enable_events=True, enter_submits=True)],
-              [sg.Button('Exit',key='-EXIT-'), sg.Text("\u25EF", key='-LED-')]]
+              [sg.Button('Exit',key='-EXIT-'), sg.Text("\u25EF", key='-LED-'), sg.Text("Data Received.")]]
 
 
     # Create the Window
@@ -51,12 +59,12 @@ def main():
     # Initiate variable for calculating when the last message was received.
     message_time = 0
 
+    # Starts server thread.
+    window.start_thread(lambda: sockets_server(window), ('-THREAD-', '-THREAD ENDED-'))
+
     while True:
         # Reads from GUI window and stores its values.
         event, values = window.read(timeout=300)  # timeout prevents gui from blocking the rest of the program.
-
-        # Starts server thread.
-        window.start_thread(lambda: sockets_server(window), ('-THREAD-', '-THEAD ENDED-'))
 
         if event in (sg.WIN_CLOSED, 'Exit') or event == '-EXIT-':
             break
@@ -84,9 +92,6 @@ def main():
         if time.time() - message_time > 2:
             window['-LED-'].update('\u25EF')
             window.Refresh()
-
-
-
 
 if __name__ == '__main__':
     main()
