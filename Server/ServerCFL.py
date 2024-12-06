@@ -40,7 +40,8 @@ def sockets_server(window):
 def main():
     # All the stuff inside your window.
     layout = [[sg.Text('TPRG Project 2 - Cornell Falconer - Lawson')],
-              [sg.Multiline(default_text = "Output", size=(30, 10), key='-DATA-',enable_events=True, enter_submits=True)]]
+              [sg.Multiline(default_text = "Output", size=(30, 10), key='-DATA-',enable_events=True, enter_submits=True)],
+              [sg.Button('Exit',key='-EXIT-')]]
 
     # Create the Window
     window = sg.Window('TPRG Project 2 Server', layout)
@@ -52,7 +53,7 @@ def main():
         # Starts server thread.
         window.start_thread(lambda: sockets_server(window), ('-THREAD-', '-THEAD ENDED-'))
 
-        if event in (sg.WIN_CLOSED, 'Exit'):
+        if event in (sg.WIN_CLOSED, 'Exit') or event == '-EXIT-':
             break
 
         if event[0] == '-THREAD-':
