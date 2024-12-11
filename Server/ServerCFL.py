@@ -1,14 +1,12 @@
 '''
 TPRG 2131 Project 2 - ServerCFL.py
-December 4th, 2024
+December 10th, 2024
 Cornell Falconer-Lawson <Cornell.FalconerLawson@dcmail.ca>
 
 This program is strictly my own work. Any material
 beyond course learning materials that is taken from
 the Web or other sources is properly cited, giving
 credit to the original author(s).
-
-
 '''
 
 import json
@@ -16,23 +14,19 @@ import socket
 import time
 import PySimpleGUI as sg
 
-
 s = socket.socket()
 host = '0.0.0.0' # IP to bind.
 port = 5000
 s.bind((host, port))
-
 s.listen(5)
 
 sg.theme('LightBlue') # Add a touch of color
 
-
 def sockets_server(window):
     """
-    Seperate thread that will run the server communications to avoid blocking the GUI.
-
+    Separate thread that will run the server communications to avoid blocking the GUI. This is managed by the pysimplegui
+    module.
     """
-
     print(f"Server started!")
     while True:
         client, addr = s.accept()
@@ -49,9 +43,9 @@ def main():
     Main Program. This will run inside the main guard.
     """
     layout = [[sg.Text('TPRG Project 2 - Cornell Falconer - Lawson')],
-              [sg.Multiline(default_text = "", size=(30, 10), key='-DATA-',enable_events=True, enter_submits=True)],
+              [sg.Text('DATA:')],
+              [sg.Text('', key='-DATA-')],
               [sg.Button('Exit',key='-EXIT-'), sg.Text("\u25EF", key='-LED-'), sg.Text("Data Received.")]]
-
 
     # Create the Window
     window = sg.Window('TPRG Project 2 Server', layout)
@@ -72,20 +66,20 @@ def main():
         if event[0] == '-THREAD-':
             f_dict = json.loads(event[1])  # Converts the received Json into a python dict.
 
-            data = ''
+            # Process data into a single string
+            data = ""
             for key, value in f_dict.items():  # https://stackoverflow.com/a/5905166
-                # print(message)
-                # print(f'{key} = {value}')
-                data = data +  f'{key} = {value}\n'
-                # print(data)
-                window['-DATA-'].update(data)  # Clear the textbox
+                data += f"{key} = {value}\n"
 
-                # Keep track of when the message was received.
-                message_time = time.time()
+            # Update the data element of the gui.
+            window['-DATA-'].update(data)
 
-                # Turn on LED
-                window['-LED-'].update('\u2B24')
-                window.Refresh()
+            # Keep track of when the message was received.
+            message_time = time.time()
+
+            # Turn on LED
+            window['-LED-'].update('\u2B24')
+            window.Refresh()
 
         # Turn off led if it's been 0.5 seconds since a message.
         if time.time() - message_time > 0.5:
