@@ -1,14 +1,12 @@
 '''
 TPRG 2131 Project 2 - ClientCFL.py
-December 4th, 2024
+December 10th, 2024
 Cornell Falconer-Lawson <Cornell.FalconerLawson@dcmail.ca>
 
 This program is strictly my own work. Any material
 beyond course learning materials that is taken from
 the Web or other sources is properly cited, giving
 credit to the original author(s).
-
-
 '''
 
 # details of the Pi's vcgencmds - https://www.tomshardware.com/how-to/raspberry-pi-benchmark-vcgencmd
@@ -19,12 +17,8 @@ import socket
 import os, time
 import json
 
-
 host = '127.0.0.1'  # Localhost
 port = 5000
-
-
-
 
 def get_temp():
     """
@@ -47,8 +41,6 @@ def get_mem():
     formatted_mem = formatted_mem.strip('\n') + 'MB' # remove new line.
     return formatted_mem
 
-
-
 def get_clock(name):
     """
   Gets from the os, using vcgencmd - the specified clock speed.
@@ -59,7 +51,6 @@ def get_clock(name):
     formatted_clock_speed = clock_speed.split('=')[1]
     formatted_clock_speed = formatted_clock_speed.split('\n')[0] + "Hz" # remove new line.
     return formatted_clock_speed
-
 
 def get_voltage():
     """
@@ -74,6 +65,14 @@ def get_voltage():
     formatted_voltage = str(formatted_voltage) + 'V' # Convert back to string and add the 'V'.
     return formatted_voltage
 
+def get_throttled():
+    """
+  Gets from the os, using vcgencmd - the throttled state of the RPi.
+  :return: Hex value
+  """
+    throttled = os.popen('/usr/bin/vcgencmd get_throttled').readline()
+    formatted_throttled = throttled.split('=')[1]
+    return formatted_throttled
 
 # check if running on pi
 try:
@@ -91,10 +90,11 @@ try:
         core_clock_speed = get_clock('core')
         voltage = get_voltage()
         total_mem = get_mem()
+        throttled_state = get_throttled()
 
         # initialising dict.
-        ini_dict = {"temperature": temp, "arm_clock_speed": arm_clock_speed, "core_clock_speed": core_clock_speed,
-                      "cpu_voltage": voltage, "total_memory" : total_mem}
+        ini_dict = {"Temperature": temp, "Arm Clock": arm_clock_speed, "Core Clock": core_clock_speed,
+                      "CPU Voltage": voltage, "Total Installed Memory" : total_mem, "Throttled Status" : throttled_state}
 
         # converting dict to json
         f_dict = json.dumps(ini_dict)
