@@ -44,7 +44,12 @@ def main():
     """
     layout = [[sg.Text('TPRG Project 2 - Cornell Falconer - Lawson')],
               [sg.Text('DATA:')],
-              [sg.Text('', key='-DATA-')],
+              [sg.Text("Temperature = V", key='-TEMP-')],
+              [sg.Text("Arm Clock = MHz", key='-ARMCLK-')],
+              [sg.Text("Core Clock = MHz", key='-CORECLK-')],
+              [sg.Text("CPU Voltage = V", key='-CPUV-')],
+              [sg.Text("Total Installed Memory = MB", key='-TMEM-')],
+              [sg.Text("Iteration = ", key='-ITER-')],
               [sg.Button('Exit',key='-EXIT-'), sg.Text("\u25EF", key='-LED-'), sg.Text("Data Received.")]]
 
     # Create the Window
@@ -66,13 +71,13 @@ def main():
         if event[0] == '-THREAD-':
             f_dict = json.loads(event[1])  # Converts the received Json into a python dict.
 
-            # Process data into a single string
-            data = ""
-            for key, value in f_dict.items():  # https://stackoverflow.com/a/5905166
-                data += f"{key} = {value}\n"
-
             # Update the data element of the gui.
-            window['-DATA-'].update(data)
+            window['-TEMP-'].update(f"Temperature = {f_dict['temperature']}C")
+            window['-ARMCLK-'].update(f"Arm Clock = {f_dict['arm_clock']}MHz")
+            window['-CORECLK-'].update(f"Core Clock = {f_dict['core_clock']}MHz")
+            window['-CPUV-'].update(f"CPU Voltage = {f_dict['cpu_v']}V")
+            window['-TMEM-'].update(f"Total Installed Memory = {f_dict['total_mem']}MB")
+            window['-ITER-'].update(f"Iteration = {f_dict['iteration']}")
 
             # Keep track of when the message was received.
             message_time = time.time()

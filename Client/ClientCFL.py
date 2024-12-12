@@ -26,7 +26,8 @@ def get_temp():
     t = os.popen('/usr/bin/vcgencmd measure_temp').readline() #vcgencmd commands
     formatted_temp = t.split('=')[1]
     formatted_temp = formatted_temp.strip('\n') # remove new line.
-    return formatted_temp
+    formatted_temp = formatted_temp.split("'C")[0]
+    return float(formatted_temp)
 
 def get_mem():
     """
@@ -36,8 +37,8 @@ def get_mem():
     # https://raspberrypi.stackexchange.com/questions/108993/what-exactly-does-vcgencmd-get-mem-arm-display
     mem = os.popen('/usr/bin/vcgencmd get_config total_mem').readline()
     formatted_mem = mem.split('=')[1]
-    formatted_mem = formatted_mem.strip('\n') + 'MB' # remove new line.
-    return formatted_mem
+    formatted_mem = formatted_mem.strip('\n') # remove new line.
+    return int(formatted_mem)
 
 def get_clock(name):
     """
@@ -47,8 +48,8 @@ def get_clock(name):
   """
     clock_speed = os.popen(f'/usr/bin/vcgencmd measure_clock {name}').readline()
     formatted_clock_speed = clock_speed.split('=')[1]
-    formatted_clock_speed = formatted_clock_speed.split('\n')[0] + "Hz" # remove new line.
-    return formatted_clock_speed
+    formatted_clock_speed = formatted_clock_speed.split('\n')[0] # remove new line.
+    return int(formatted_clock_speed)
 
 def get_voltage():
     """
@@ -60,7 +61,6 @@ def get_voltage():
     formatted_voltage = formatted_voltage.strip('\n')    # remove new line.
     formatted_voltage = formatted_voltage.split('V')[0] # remove 'V' so that it can be rounded.
     formatted_voltage = round(float(formatted_voltage), 1) # convert to float and round to 1 decimal.
-    formatted_voltage = str(formatted_voltage) + 'V' # Convert back to string and add the 'V'.
     return formatted_voltage
 
 def get_throttled():
@@ -81,6 +81,9 @@ except:
 
 
 def main():
+    """
+    Main Program. This will run inside the main guard.
+    """
     host = '127.0.0.1'  # Localhost
     port = 5000
 
@@ -106,22 +109,23 @@ def main():
             core_clock_speed = get_clock('core')
             voltage = get_voltage()
             total_mem = get_mem()
-            throttled_state = get_throttled()
-
-            # initialising dict.
-            ini_dict = {"Temperature": temp, "Arm Clock": arm_clock_speed, "Core Clock": core_clock_speed,
-                          "CPU Voltage": voltage, "Total Installed Memory" : total_mem, "Throttled Status" : throttled_state}
-
-            # converting dict to json
-            f_dict = json.dumps(ini_dict)
-
-            c = socket.socket()
 
             # Check for a connection and send data.
             try:
+                # Count the message number.
+                message_count += 1
+
+                # initialising dict.
+                ini_dict = {"temperature": temp, "arm_clock": arm_clock_speed, "core_clock": core_clock_speed,
+                            "cpu_v": voltage, "total_mem": total_mem, "iteration": message_count}
+
+                # converting dict to json
+                f_dict = json.dumps(ini_dict)
+
+                # Connect to server and send data.
+                c = socket.socket()
                 c.connect((host, port))
                 c.send(str(f_dict).encode())  # sends data as a byte type
-                #print(ini_dict)
                 print(f"Data sent to: {host}:{port}")
 
                 # Turn on LED
@@ -132,7 +136,6 @@ def main():
 
                 # Store the time and the current interation of the data
                 message_time = time.time()
-                message_count += 1
 
             # If a connection could not be made, do nothing.
             except:
