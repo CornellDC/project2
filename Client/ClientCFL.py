@@ -16,9 +16,7 @@ credit to the original author(s).
 import socket
 import os, time
 import json
-
-host = '127.0.0.1'  # Localhost
-port = 5000
+import PySimpleGUI as sg
 
 def get_temp():
     """
@@ -81,34 +79,79 @@ try:
 except:
     exit()
 
-try:
-    for i in range(50): # Send 50 iterations.
 
-        # Retrieve sensor values
-        temp = get_temp()
-        arm_clock_speed = get_clock('arm')
-        core_clock_speed = get_clock('core')
-        voltage = get_voltage()
-        total_mem = get_mem()
-        throttled_state = get_throttled()
+def main():
+    host = '127.0.0.1'  # Localhost
+    port = 5000
 
-        # initialising dict.
-        ini_dict = {"Temperature": temp, "Arm Clock": arm_clock_speed, "Core Clock": core_clock_speed,
-                      "CPU Voltage": voltage, "Total Installed Memory" : total_mem, "Throttled Status" : throttled_state}
+    layout = [[sg.Text('TPRG Project 2 Client - Cornell Falconer - Lawson')],
+              [sg.Button('Exit', key='-EXIT-'), sg.Text("\u25EF", key='-LED-'), sg.Text("Data Sent.")]]
 
-        # converting dict to json
-        f_dict = json.dumps(ini_dict)
+    window = sg.Window('TPRG Project 2 Client', layout)
 
-        c = socket.socket()
-        c.connect((host, port))
-        c.send(str(f_dict).encode())  # sends data as a byte type
-        #print(ini_dict)
-        print(f"Data sent to: {host}:{port}")
-        c.close()
-        time.sleep(2)
+    message_time = 0
+    message_count = 0
+
+    while True:
+        # Reads from GUI window and stores its values.
+        event, values = window.read(timeout=300)  # timeout prevents gui from blocking the rest of the program.
+
+        if event in (sg.WIN_CLOSED, 'Exit') or event == '-EXIT-':
+            break
+
+        if time.time() - message_time > 2:
+            # Retrieve sensor values
+            temp = get_temp()
+            arm_clock_speed = get_clock('arm')
+            core_clock_speed = get_clock('core')
+            voltage = get_voltage()
+            total_mem = get_mem()
+            throttled_state = get_throttled()
+
+            # initialising dict.
+            ini_dict = {"Temperature": temp, "Arm Clock": arm_clock_speed, "Core Clock": core_clock_speed,
+                          "CPU Voltage": voltage, "Total Installed Memory" : total_mem, "Throttled Status" : throttled_state}
+
+            # converting dict to json
+            f_dict = json.dumps(ini_dict)
+
+            c = socket.socket()
+
+            # Check for a connection and send data.
+            try:
+                c.connect((host, port))
+                c.send(str(f_dict).encode())  # sends data as a byte type
+                #print(ini_dict)
+                print(f"Data sent to: {host}:{port}")
+
+                # Turn on LED
+                window['-LED-'].update('\u2B24')
+
+                window.Refresh()
+                c.close()
+
+                # Store the time and the current interation of the data
+                message_time = time.time()
+                message_count += 1
+
+            # If a connection could not be made, do nothing.
+            except:
+                pass
+
+        # Turn off led if it's been 0.5 seconds since a message.
+        if time.time() - message_time > 0.5:
+            window['-LED-'].update('\u25EF')
+            window.Refresh()
+
+        # Exit once 50 messages are sent.
+        if message_count == 50:
+            break
 
     print("Done!")
 
+try:
+    if __name__ == '__main__':
+        main()
+
 except KeyboardInterrupt:
-    c.close()
     print("Thank you for using my program.")
