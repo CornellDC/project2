@@ -1,6 +1,6 @@
 '''
 TPRG 2131 Project 2 - ClientCFL.py
-December 10th, 2024
+December 13th, 2024
 Cornell Falconer-Lawson <Cornell.FalconerLawson@dcmail.ca>
 
 This program is strictly my own work. Any material
@@ -77,8 +77,8 @@ try:
     if not os.uname()[1] == "raspberrypi": # Confirm the machine is specifically the pi and not just linux.
         exit()
 except:
+    # Exit if not running on pi.
     exit()
-
 
 def main():
     """
@@ -87,11 +87,13 @@ def main():
     host = '127.0.0.1'  # Localhost
     port = 5000
 
+    # Initial program layout.
     layout = [[sg.Text('TPRG Project 2 Client - Cornell Falconer - Lawson')],
               [sg.Button('Exit', key='-EXIT-'), sg.Text("\u25EF", key='-LED-'), sg.Text("Data Sent.")]]
 
     window = sg.Window('TPRG Project 2 Client', layout)
 
+    # Empty variables that will store the current iteration and the time the message was sent.
     message_time = 0
     message_count = 0
 
@@ -99,9 +101,11 @@ def main():
         # Reads from GUI window and stores its values.
         event, values = window.read(timeout=300)  # timeout prevents gui from blocking the rest of the program.
 
+        # Exit once the exit button is pressed.
         if event in (sg.WIN_CLOSED, 'Exit') or event == '-EXIT-':
             break
 
+        # When 2s has elapsed since the last message was sent.
         if time.time() - message_time > 2:
             # Retrieve sensor values
             temp = get_temp()

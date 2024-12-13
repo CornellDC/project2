@@ -1,6 +1,6 @@
 '''
 TPRG 2131 Project 2 - ServerCFL.py
-December 10th, 2024
+December 13th, 2024
 Cornell Falconer-Lawson <Cornell.FalconerLawson@dcmail.ca>
 
 This program is strictly my own work. Any material
@@ -65,13 +65,15 @@ def main():
         # Reads from GUI window and stores its values.
         event, values = window.read(timeout=300)  # timeout prevents gui from blocking the rest of the program.
 
+        # Exit once the exit button is clicked.
         if event in (sg.WIN_CLOSED, 'Exit') or event == '-EXIT-':
             break
 
+        # Server callback:
         if event[0] == '-THREAD-':
             f_dict = json.loads(event[1])  # Converts the received Json into a python dict.
 
-            # Update the data element of the gui.
+            # Update the gui with the new data, adding units.
             window['-TEMP-'].update(f"Temperature = {f_dict['temperature']}C")
             window['-ARMCLK-'].update(f"Arm Clock = {f_dict['arm_clock']}MHz")
             window['-CORECLK-'].update(f"Core Clock = {f_dict['core_clock']}MHz")
